@@ -1,5 +1,7 @@
+
 plugins {
     alias(libs.plugins.android.application)
+    // Добавляем плагин
 }
 
 android {
@@ -33,6 +35,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
 }
 
 dependencies {
@@ -42,4 +45,5 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
 }
