@@ -8,10 +8,10 @@ import android.view.accessibility.AccessibilityNodeInfo
 import java.io.OutputStream
 import java.net.Socket
 import java.util.concurrent.Executors
-
+import java.util.concurrent.atomic.AtomicInteger
 
 class RatatoskrService: AccessibilityService() {
-
+    private val nodeCounter = AtomicInteger(0)
     private val executor = Executors.newSingleThreadExecutor()
     private var outputStream : OutputStream? = null
     private var socket: Socket ?= null
@@ -36,33 +36,44 @@ class RatatoskrService: AccessibilityService() {
             }
         }
     }
-    private fun captureScreen(rootNode: AccessibilityNodeInfo): ScreenDump{
+    private fun captureScreen(rootNode: AccessibilityNodeInfo): ScreenDump {
+        nodeCounter.set(0)
+
         val dumpBuilder = ScreenDump.newBuilder()
             .setPackageName(rootNode.packageName?.toString() ?: "unknown")
             .setTimestamp(System.currentTimeMillis())
-            // Здесь можно добавить реальные размеры экрана из WindowManager
             .setWidth(1080)
             .setHeight(1920)
 
-        flattenTree(rootNode, dumpBuilder)
-        return dumpBuilder.build()
+        // root have parentId = -1
+        flattenTree(rootNode, dumpBuilder, -1)
 
+        return dumpBuilder.build()
     }
-    private fun flattenTree(node: AccessibilityNodeInfo, dumpBuilder: ScreenDump.Builder) {
-        // collect data if have ID
+    private fun flattenTree(
+        node: AccessibilityNodeInfo,
+        dumpBuilder: ScreenDump.Builder,
+        parentId: Int
+    ) {
+
+        val currentId = nodeCounter.incrementAndGet()
+
         val text = node.text?.toString() ?: ""
         val resId = node.viewIdResourceName ?: ""
 
-        if (text.isNotEmpty() || resId.isNotEmpty() || node.isClickable) {
+
+        if (text.isNotEmpty() || resId.isNotEmpty() || node.isClickable || node.childCount > 0) {
             val bounds = android.graphics.Rect()
             node.getBoundsInScreen(bounds)
 
             val nodeProto = UiNode.newBuilder()
+                .setId(currentId)
+                .setParentId(parentId)
                 .setText(text)
                 .setResourceId(resId)
                 .setClassName(node.className?.toString() ?: "")
                 .setIsClickable(node.isClickable)
-                .setBounds(Rect.newBuilder()
+                .setBounds(com.project.ratatoskr.Rect.newBuilder()
                     .setLeft(bounds.left)
                     .setTop(bounds.top)
                     .setRight(bounds.right)
@@ -73,9 +84,9 @@ class RatatoskrService: AccessibilityService() {
         }
 
         for (i in 0 until node.childCount) {
-            node.getChild(i)?.let {
-                flattenTree(it, dumpBuilder)
-                it.recycle()
+            node.getChild(i)?.let { child ->
+                flattenTree(child, dumpBuilder, currentId)
+                child.recycle()
             }
         }
     }
@@ -120,5 +131,9 @@ class RatatoskrService: AccessibilityService() {
 
     override fun onInterrupt() {
         Log.i("RATATOSKR","Service stopped")
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        executor.shutdown()
     }
 }
