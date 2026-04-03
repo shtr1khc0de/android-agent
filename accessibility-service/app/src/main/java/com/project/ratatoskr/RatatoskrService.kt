@@ -29,7 +29,7 @@ class RatatoskrService : AccessibilityService() {
 
     companion object {
         private const val TAG = "RATATOSKR"
-        private const val NIDHOGG_HOST = "10.0.2.2"  // localhost для эмулятора/контейнера
+        private const val NIDHOGG_HOST = "127.0.0.1"  // localhost для эмулятора/контейнера
         private const val NIDHOGG_PORT = 9999
     }
 
@@ -425,7 +425,7 @@ class RatatoskrService : AccessibilityService() {
         }
     }
 
-    
+
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event?.eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED ||
             event?.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED

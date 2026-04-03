@@ -16,7 +16,7 @@ type RatatoskrHandler struct {
 	dumpRequestCh <-chan chan *pb.ScreenDump
 	lastDump      *pb.ScreenDump
 	lastDumpMutex sync.RWMutex
-	conn          net.Conn // Сохраняем соединение для отправки команд
+	conn          net.Conn
 }
 
 func NewRatatoskrHandler(registry *Registry, dumpRequestCh <-chan chan *pb.ScreenDump) *RatatoskrHandler {
@@ -35,12 +35,11 @@ func (h *RatatoskrHandler) Handle(conn net.Conn) {
 
 	fmt.Println("[Ratatoskr] Client connected")
 
-	// Запускаем обработку запросов дампа
+	// Запускаем обработку запросов дампа от Yggdrasil
 	go h.handleDumpRequests()
 
 	// Цикл чтения дампов от Ratatoskr
 	for {
-		// Читаем заголовок (4 байта длины)
 		header := make([]byte, 4)
 		if _, err := io.ReadFull(conn, header); err != nil {
 			if err == io.EOF {
@@ -52,15 +51,12 @@ func (h *RatatoskrHandler) Handle(conn net.Conn) {
 		}
 
 		size := binary.BigEndian.Uint32(header)
-
-		// Читаем payload
 		payload := make([]byte, size)
 		if _, err := io.ReadFull(conn, payload); err != nil {
 			fmt.Printf("[Ratatoskr] Payload read error: %v\n", err)
 			return
 		}
 
-		// Парсим ScreenDump
 		dump := &pb.ScreenDump{}
 		if err := proto.Unmarshal(payload, dump); err != nil {
 			fmt.Printf("[Ratatoskr] Protobuf unmarshal error: %v\n", err)
@@ -72,8 +68,8 @@ func (h *RatatoskrHandler) Handle(conn net.Conn) {
 		h.lastDump = dump
 		h.lastDumpMutex.Unlock()
 
-		fmt.Printf("[Ratatoskr] Received dump: pkg=%s, nodes=%d, time=%d\n",
-			dump.PackageName, len(dump.Nodes), dump.Timestamp)
+		fmt.Printf("[Ratatoskr] Received dump: pkg=%s, nodes=%d\n",
+			dump.PackageName, len(dump.Nodes))
 
 		// Отправляем дамп в Yggdrasil (если подключён)
 		if client := h.registry.GetYggdrasil(); client != nil {
@@ -82,7 +78,7 @@ func (h *RatatoskrHandler) Handle(conn net.Conn) {
 	}
 }
 
-// Обработка запросов на получение дампа от Yggdrasil
+// handleDumpRequests обрабатывает запросы от Yggdrasil на получение свежего дампа
 func (h *RatatoskrHandler) handleDumpRequests() {
 	for respCh := range h.dumpRequestCh {
 		h.lastDumpMutex.RLock()
@@ -90,34 +86,34 @@ func (h *RatatoskrHandler) handleDumpRequests() {
 		h.lastDumpMutex.RUnlock()
 
 		if dump == nil {
+			fmt.Println("[Ratatoskr] GetDump: no dump available")
 			respCh <- nil
 		} else {
-			// Отправляем копию, чтобы оригинал не изменился
+			fmt.Printf("[Ratatoskr] GetDump: returning dump with %d nodes\n", len(dump.Nodes))
+			// Отправляем копию
 			respCh <- proto.Clone(dump).(*pb.ScreenDump)
 		}
 	}
 }
 
-// SendCommand отправляет команду в Ratatoskr (через то же соединение)
+// SendCommand отправляет команду в Ratatoskr
 func (h *RatatoskrHandler) SendCommand(cmd *pb.AgentCMD) error {
 	if h.conn == nil {
 		return fmt.Errorf("no connection to Ratatoskr")
 	}
 
-	// Сериализуем команду
 	data, err := proto.Marshal(cmd)
 	if err != nil {
-		return fmt.Errorf("marshal error: %w", err)
+		return err
 	}
 
-	// Отправляем с фреймингом (4 байта длины, BigEndian)
 	if err := binary.Write(h.conn, binary.BigEndian, uint32(len(data))); err != nil {
-		return fmt.Errorf("write length error: %w", err)
+		return err
 	}
 	if _, err := h.conn.Write(data); err != nil {
-		return fmt.Errorf("write data error: %w", err)
+		return err
 	}
 
-	fmt.Printf("[Ratatoskr] Sent command: type=%v, payload=%s\n", cmd.Type, cmd.Payload)
+	fmt.Printf("[Ratatoskr] Sent command: %v\n", cmd.Type)
 	return nil
 }
