@@ -20,6 +20,7 @@ const (
 	ABS_X      = 0x00
 	ABS_Y      = 0x01
 	EVIOCGABS  = 0x80184540 //cord limits
+
 )
 
 type Driver struct {
@@ -32,7 +33,7 @@ type Driver struct {
 	BytesPerPixel int
 }
 
-type inputEnvet struct {
+type inputEvent struct {
 	Time  syscall.Timeval
 	Type  uint16
 	Code  uint16
@@ -107,7 +108,7 @@ func NewDriver(evPath, fbPath string, screenW, screenH int32, bytesPerPixel int)
 
 	}
 	//open framebuffer
-	fbFile, err := os.OpenFile(evPath, os.O_WRONLY, 0666)
+	fbFile, err := os.OpenFile(evPath, os.O_RDONLY, 0)
 	if err != nil {
 		evFile.Close()
 		return nil, fmt.Errorf("failed to open framebuffer device %s: %w", fbPath, err)
@@ -164,7 +165,7 @@ func (d *Driver) calibrate() error {
 // one event for input device
 func (d *Driver) write(evType, evCode uint16, value int32) error {
 	nowTime := time.Now()
-	ev := inputEnvet{
+	ev := inputEvent{
 		Time: syscall.Timeval{
 			Sec:  nowTime.Unix(),
 			Usec: int32(nowTime.Nanosecond() / 1000),
@@ -180,6 +181,9 @@ func (d *Driver) GetScreenSize() (int32, int32) {
 }
 func (d *Driver) GetTouchLimits() (int32, int32) {
 	return d.MaxX, d.MaxY
+}
+func (d *Driver) GetBytesPerPixel() int {
+	return d.BytesPerPixel
 }
 func (d *Driver) Tap(x, y int32) error {
 	rx := (x * d.MaxX) / d.ScreenW

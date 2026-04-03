@@ -1,28 +1,54 @@
 package main
 
 import (
-	"fmt"
-	"net"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
-	sv "github.com/Vancheszz/android-agent/internal/server"
+	"github.com/Vancheszz/android-agent/internal/input"
+	"github.com/Vancheszz/android-agent/internal/server"
 )
 
 func main() {
-	port := ":9999"
+	log.Println("Starting Nidhogg...")
 
-	listener, err := net.Listen("tcp", port)
+	drv, err := input.NewDriverAutoEV("/dev/graphics/fb0", 1080, 1920, 4)
 	if err != nil {
-		fmt.Printf("Statring server error :%v\n", err)
+		log.Fatalf("Failed to initialize driver: %v", err)
 	}
-	defer listener.Close()
-	fmt.Printf("Nidhogg running on port: %v\n", port)
-	fmt.Printf("Wait connection")
-	for {
-		conn, err := listener.Accept()
-		if err != nil {
-			fmt.Printf("Accept Err %v\n", err)
-			continue
+	defer drv.Close()
+
+	screenWidth, screenHeight := drv.GetScreenSize()
+	touchX, touchY := drv.GetTouchLimits()
+	log.Printf("Driver initialized: screen=%dx%d, touch_limits=(%d,%d), bpp=%d",
+		screenWidth, screenHeight, touchX, touchY, drv.BytesPerPixel)
+
+	srv := server.NewServer(drv)
+
+	// Запускаем сервер для Ratatoskr (порт :9999)
+	go func() {
+		if err := srv.StartRatatoskrServer(":9999"); err != nil {
+			log.Fatalf("Ratatoskr server failed: %v", err)
 		}
-		go sv.HandleConnection(conn) //running in gorutine
-	}
+	}()
+
+	// Запускаем сервер для Yggdrasil (порт :9998)
+	go func() {
+		if err := srv.StartYggdrasilServer(":9998"); err != nil {
+			log.Fatalf("Yggdrasil server failed: %v", err)
+		}
+	}()
+
+	log.Println("Nidhogg is running")
+	log.Println("  - Ratatoskr port: :9999 (receives ScreenDump)")
+	log.Println("  - Yggdrasil port: :9998 (receives commands)")
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	log.Println("Shutting down Nidhogg...")
+	srv.Stop()
+	log.Println("Done")
 }

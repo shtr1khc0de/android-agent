@@ -1,68 +1,76 @@
 package server
 
 import (
-	"encoding/binary"
-	"fmt"
-	"io"
 	"net"
 
+	"github.com/Vancheszz/android-agent/internal/input"
 	pb "github.com/Vancheszz/android-agent/internal/ratatoskr"
-	"google.golang.org/protobuf/proto"
 )
 
-func HandleConnection(conn net.Conn) {
-	defer conn.Close()
-	fmt.Println("Connect to Ratatoskr")
+type Server struct {
+	driver   *input.Driver
+	registry *Registry
+
+	ratatoskrListener net.Listener
+	yggdrasilListener net.Listener
+
+	// Канал для передачи запросов дампа от Yggdrasil к Ratatoskr
+	dumpRequestCh chan chan *pb.ScreenDump
+}
+
+func NewServer(driver *input.Driver) *Server {
+	dumpRequestCh := make(chan chan *pb.ScreenDump)
+
+	return &Server{
+		driver:        driver,
+		registry:      NewRegistry(),
+		dumpRequestCh: dumpRequestCh,
+	}
+}
+
+func (s *Server) StartRatatoskrServer(addr string) error {
+	listener, err := net.Listen("tcp", addr)
+	if err != nil {
+		return err
+	}
+	s.ratatoskrListener = listener
+
+	handler := NewRatatoskrHandler(s.registry, s.dumpRequestCh)
 
 	for {
-		//read header from ratatoskr
-		header := make([]byte, 4)
-		_, err := io.ReadFull(conn, header)
+		conn, err := listener.Accept()
 		if err != nil {
-			if err == io.EOF {
-				fmt.Printf("Agent was disconnected: %s\n", conn.RemoteAddr())
-			} else {
-				fmt.Printf("Header read error: %s\n", err)
-			}
-			return
+			// Если листенер закрыт, выходим
+			return nil
 		}
-		//convert header to number (BigEndian Type)
-		size := binary.BigEndian.Uint32(header)
-		//read data
-		payload := make([]byte, size)
-
-		_, err = io.ReadFull(conn, payload)
-		if err != nil {
-			fmt.Printf("Reading Payload error: %s\n", err)
-		}
-		//Get Dump !
-		dump := &pb.ScreenDump{}
-		if err := proto.Unmarshal(payload, dump); err != nil {
-			fmt.Printf("Err reading package: %v\n", err)
-			continue
-		}
-
-		fmt.Printf("Dump: %s | Nodes: %d | Time: %d\n",
-			dump.PackageName, len(dump.Nodes), dump.Timestamp)
-		for i, node := range dump.Nodes {
-			if i > 70 {
-				fmt.Println("... и остальные ноды")
-				break
-			}
-
-			fmt.Printf("  [Node %d] Class: %s | Text: '%s' | ResourceID: %s | Clickable: %v |  Bounds: [%d, %d, %d, %d]\n",
-				i,
-				node.ClassName,
-				node.Text,
-				node.ResourceId,
-				node.IsClickable,
-				node.Bounds.Left,
-				node.Bounds.Top,
-				node.Bounds.Right,
-				node.Bounds.Bottom,
-			)
-		}
-
+		go handler.Handle(conn)
 	}
+}
 
+func (s *Server) StartYggdrasilServer(addr string) error {
+	listener, err := net.Listen("tcp", addr)
+	if err != nil {
+		return err
+	}
+	s.yggdrasilListener = listener
+
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			return nil
+		}
+		handler := NewYggdrasilHandler(conn, s.driver, s.registry)
+		// Передаём канал для запросов дампа
+		handler.dumpRequestCh = s.dumpRequestCh
+		go handler.Handle()
+	}
+}
+
+func (s *Server) Stop() {
+	if s.ratatoskrListener != nil {
+		s.ratatoskrListener.Close()
+	}
+	if s.yggdrasilListener != nil {
+		s.yggdrasilListener.Close()
+	}
 }

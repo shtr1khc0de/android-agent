@@ -21,6 +21,74 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type NidhoggHello struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ContainerId   string                 `protobuf:"bytes,1,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
+	ScreenWidth   int32                  `protobuf:"varint,2,opt,name=screen_width,json=screenWidth,proto3" json:"screen_width,omitempty"`
+	ScreenHeight  int32                  `protobuf:"varint,3,opt,name=screen_height,json=screenHeight,proto3" json:"screen_height,omitempty"`
+	Version       string                 `protobuf:"bytes,4,opt,name=version,proto3" json:"version,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *NidhoggHello) Reset() {
+	*x = NidhoggHello{}
+	mi := &file_control_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NidhoggHello) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NidhoggHello) ProtoMessage() {}
+
+func (x *NidhoggHello) ProtoReflect() protoreflect.Message {
+	mi := &file_control_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NidhoggHello.ProtoReflect.Descriptor instead.
+func (*NidhoggHello) Descriptor() ([]byte, []int) {
+	return file_control_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *NidhoggHello) GetContainerId() string {
+	if x != nil {
+		return x.ContainerId
+	}
+	return ""
+}
+
+func (x *NidhoggHello) GetScreenWidth() int32 {
+	if x != nil {
+		return x.ScreenWidth
+	}
+	return 0
+}
+
+func (x *NidhoggHello) GetScreenHeight() int32 {
+	if x != nil {
+		return x.ScreenHeight
+	}
+	return 0
+}
+
+func (x *NidhoggHello) GetVersion() string {
+	if x != nil {
+		return x.Version
+	}
+	return ""
+}
+
 type NidhoggRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Types that are valid to be assigned to Payload:
@@ -28,6 +96,7 @@ type NidhoggRequest struct {
 	//	*NidhoggRequest_Tap
 	//	*NidhoggRequest_Swipe
 	//	*NidhoggRequest_Crop
+	//	*NidhoggRequest_GetDump
 	Payload       isNidhoggRequest_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -35,7 +104,7 @@ type NidhoggRequest struct {
 
 func (x *NidhoggRequest) Reset() {
 	*x = NidhoggRequest{}
-	mi := &file_control_proto_msgTypes[0]
+	mi := &file_control_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -47,7 +116,7 @@ func (x *NidhoggRequest) String() string {
 func (*NidhoggRequest) ProtoMessage() {}
 
 func (x *NidhoggRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_control_proto_msgTypes[0]
+	mi := &file_control_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -60,7 +129,7 @@ func (x *NidhoggRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NidhoggRequest.ProtoReflect.Descriptor instead.
 func (*NidhoggRequest) Descriptor() ([]byte, []int) {
-	return file_control_proto_rawDescGZIP(), []int{0}
+	return file_control_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *NidhoggRequest) GetPayload() isNidhoggRequest_Payload {
@@ -97,6 +166,15 @@ func (x *NidhoggRequest) GetCrop() *CropRequest {
 	return nil
 }
 
+func (x *NidhoggRequest) GetGetDump() *GetDumpRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*NidhoggRequest_GetDump); ok {
+			return x.GetDump
+		}
+	}
+	return nil
+}
+
 type isNidhoggRequest_Payload interface {
 	isNidhoggRequest_Payload()
 }
@@ -113,11 +191,17 @@ type NidhoggRequest_Crop struct {
 	Crop *CropRequest `protobuf:"bytes,3,opt,name=crop,proto3,oneof"`
 }
 
+type NidhoggRequest_GetDump struct {
+	GetDump *GetDumpRequest `protobuf:"bytes,4,opt,name=get_dump,json=getDump,proto3,oneof"`
+}
+
 func (*NidhoggRequest_Tap) isNidhoggRequest_Payload() {}
 
 func (*NidhoggRequest_Swipe) isNidhoggRequest_Payload() {}
 
 func (*NidhoggRequest_Crop) isNidhoggRequest_Payload() {}
+
+func (*NidhoggRequest_GetDump) isNidhoggRequest_Payload() {}
 
 type TapCommand struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -129,7 +213,7 @@ type TapCommand struct {
 
 func (x *TapCommand) Reset() {
 	*x = TapCommand{}
-	mi := &file_control_proto_msgTypes[1]
+	mi := &file_control_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -141,7 +225,7 @@ func (x *TapCommand) String() string {
 func (*TapCommand) ProtoMessage() {}
 
 func (x *TapCommand) ProtoReflect() protoreflect.Message {
-	mi := &file_control_proto_msgTypes[1]
+	mi := &file_control_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -154,7 +238,7 @@ func (x *TapCommand) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TapCommand.ProtoReflect.Descriptor instead.
 func (*TapCommand) Descriptor() ([]byte, []int) {
-	return file_control_proto_rawDescGZIP(), []int{1}
+	return file_control_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *TapCommand) GetX() int32 {
@@ -184,7 +268,7 @@ type SwipeCommand struct {
 
 func (x *SwipeCommand) Reset() {
 	*x = SwipeCommand{}
-	mi := &file_control_proto_msgTypes[2]
+	mi := &file_control_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -196,7 +280,7 @@ func (x *SwipeCommand) String() string {
 func (*SwipeCommand) ProtoMessage() {}
 
 func (x *SwipeCommand) ProtoReflect() protoreflect.Message {
-	mi := &file_control_proto_msgTypes[2]
+	mi := &file_control_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -209,7 +293,7 @@ func (x *SwipeCommand) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SwipeCommand.ProtoReflect.Descriptor instead.
 func (*SwipeCommand) Descriptor() ([]byte, []int) {
-	return file_control_proto_rawDescGZIP(), []int{2}
+	return file_control_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *SwipeCommand) GetX1() int32 {
@@ -259,7 +343,7 @@ type CropRequest struct {
 
 func (x *CropRequest) Reset() {
 	*x = CropRequest{}
-	mi := &file_control_proto_msgTypes[3]
+	mi := &file_control_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -271,7 +355,7 @@ func (x *CropRequest) String() string {
 func (*CropRequest) ProtoMessage() {}
 
 func (x *CropRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_control_proto_msgTypes[3]
+	mi := &file_control_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -284,7 +368,7 @@ func (x *CropRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CropRequest.ProtoReflect.Descriptor instead.
 func (*CropRequest) Descriptor() ([]byte, []int) {
-	return file_control_proto_rawDescGZIP(), []int{3}
+	return file_control_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *CropRequest) GetX() int32 {
@@ -315,6 +399,42 @@ func (x *CropRequest) GetHeight() int32 {
 	return 0
 }
 
+type GetDumpRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetDumpRequest) Reset() {
+	*x = GetDumpRequest{}
+	mi := &file_control_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetDumpRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetDumpRequest) ProtoMessage() {}
+
+func (x *GetDumpRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_control_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetDumpRequest.ProtoReflect.Descriptor instead.
+func (*GetDumpRequest) Descriptor() ([]byte, []int) {
+	return file_control_proto_rawDescGZIP(), []int{5}
+}
+
 type NidhoggResponse struct {
 	state    protoimpl.MessageState `protogen:"open.v1"`
 	Success  bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
@@ -322,6 +442,7 @@ type NidhoggResponse struct {
 	// Types that are valid to be assigned to Data:
 	//
 	//	*NidhoggResponse_ImageData
+	//	*NidhoggResponse_ScreenDump
 	Data          isNidhoggResponse_Data `protobuf_oneof:"data"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -329,7 +450,7 @@ type NidhoggResponse struct {
 
 func (x *NidhoggResponse) Reset() {
 	*x = NidhoggResponse{}
-	mi := &file_control_proto_msgTypes[4]
+	mi := &file_control_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -341,7 +462,7 @@ func (x *NidhoggResponse) String() string {
 func (*NidhoggResponse) ProtoMessage() {}
 
 func (x *NidhoggResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_control_proto_msgTypes[4]
+	mi := &file_control_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -354,7 +475,7 @@ func (x *NidhoggResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NidhoggResponse.ProtoReflect.Descriptor instead.
 func (*NidhoggResponse) Descriptor() ([]byte, []int) {
-	return file_control_proto_rawDescGZIP(), []int{4}
+	return file_control_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *NidhoggResponse) GetSuccess() bool {
@@ -387,6 +508,15 @@ func (x *NidhoggResponse) GetImageData() []byte {
 	return nil
 }
 
+func (x *NidhoggResponse) GetScreenDump() *ScreenDump {
+	if x != nil {
+		if x, ok := x.Data.(*NidhoggResponse_ScreenDump); ok {
+			return x.ScreenDump
+		}
+	}
+	return nil
+}
+
 type isNidhoggResponse_Data interface {
 	isNidhoggResponse_Data()
 }
@@ -395,17 +525,265 @@ type NidhoggResponse_ImageData struct {
 	ImageData []byte `protobuf:"bytes,3,opt,name=image_data,json=imageData,proto3,oneof"`
 }
 
+type NidhoggResponse_ScreenDump struct {
+	ScreenDump *ScreenDump `protobuf:"bytes,4,opt,name=screen_dump,json=screenDump,proto3,oneof"`
+}
+
 func (*NidhoggResponse_ImageData) isNidhoggResponse_Data() {}
+
+func (*NidhoggResponse_ScreenDump) isNidhoggResponse_Data() {}
+
+type ScreenDump struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PackageName   string                 `protobuf:"bytes,1,opt,name=package_name,json=packageName,proto3" json:"package_name,omitempty"`
+	Timestamp     int64                  `protobuf:"varint,2,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	Width         int32                  `protobuf:"varint,3,opt,name=width,proto3" json:"width,omitempty"`
+	Height        int32                  `protobuf:"varint,4,opt,name=height,proto3" json:"height,omitempty"`
+	Nodes         []*UiNode              `protobuf:"bytes,5,rep,name=nodes,proto3" json:"nodes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ScreenDump) Reset() {
+	*x = ScreenDump{}
+	mi := &file_control_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ScreenDump) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ScreenDump) ProtoMessage() {}
+
+func (x *ScreenDump) ProtoReflect() protoreflect.Message {
+	mi := &file_control_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ScreenDump.ProtoReflect.Descriptor instead.
+func (*ScreenDump) Descriptor() ([]byte, []int) {
+	return file_control_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *ScreenDump) GetPackageName() string {
+	if x != nil {
+		return x.PackageName
+	}
+	return ""
+}
+
+func (x *ScreenDump) GetTimestamp() int64 {
+	if x != nil {
+		return x.Timestamp
+	}
+	return 0
+}
+
+func (x *ScreenDump) GetWidth() int32 {
+	if x != nil {
+		return x.Width
+	}
+	return 0
+}
+
+func (x *ScreenDump) GetHeight() int32 {
+	if x != nil {
+		return x.Height
+	}
+	return 0
+}
+
+func (x *ScreenDump) GetNodes() []*UiNode {
+	if x != nil {
+		return x.Nodes
+	}
+	return nil
+}
+
+type UiNode struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	ParentId      int32                  `protobuf:"varint,2,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	Text          string                 `protobuf:"bytes,3,opt,name=text,proto3" json:"text,omitempty"`
+	ResourceId    string                 `protobuf:"bytes,4,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	ClassName     string                 `protobuf:"bytes,5,opt,name=class_name,json=className,proto3" json:"class_name,omitempty"`
+	IsClickable   bool                   `protobuf:"varint,6,opt,name=is_clickable,json=isClickable,proto3" json:"is_clickable,omitempty"`
+	Bounds        *Rect                  `protobuf:"bytes,7,opt,name=bounds,proto3" json:"bounds,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UiNode) Reset() {
+	*x = UiNode{}
+	mi := &file_control_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UiNode) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UiNode) ProtoMessage() {}
+
+func (x *UiNode) ProtoReflect() protoreflect.Message {
+	mi := &file_control_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UiNode.ProtoReflect.Descriptor instead.
+func (*UiNode) Descriptor() ([]byte, []int) {
+	return file_control_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *UiNode) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *UiNode) GetParentId() int32 {
+	if x != nil {
+		return x.ParentId
+	}
+	return 0
+}
+
+func (x *UiNode) GetText() string {
+	if x != nil {
+		return x.Text
+	}
+	return ""
+}
+
+func (x *UiNode) GetResourceId() string {
+	if x != nil {
+		return x.ResourceId
+	}
+	return ""
+}
+
+func (x *UiNode) GetClassName() string {
+	if x != nil {
+		return x.ClassName
+	}
+	return ""
+}
+
+func (x *UiNode) GetIsClickable() bool {
+	if x != nil {
+		return x.IsClickable
+	}
+	return false
+}
+
+func (x *UiNode) GetBounds() *Rect {
+	if x != nil {
+		return x.Bounds
+	}
+	return nil
+}
+
+type Rect struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Left          int32                  `protobuf:"varint,1,opt,name=left,proto3" json:"left,omitempty"`
+	Right         int32                  `protobuf:"varint,2,opt,name=right,proto3" json:"right,omitempty"`
+	Top           int32                  `protobuf:"varint,3,opt,name=top,proto3" json:"top,omitempty"`
+	Bottom        int32                  `protobuf:"varint,4,opt,name=bottom,proto3" json:"bottom,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Rect) Reset() {
+	*x = Rect{}
+	mi := &file_control_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Rect) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Rect) ProtoMessage() {}
+
+func (x *Rect) ProtoReflect() protoreflect.Message {
+	mi := &file_control_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Rect.ProtoReflect.Descriptor instead.
+func (*Rect) Descriptor() ([]byte, []int) {
+	return file_control_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *Rect) GetLeft() int32 {
+	if x != nil {
+		return x.Left
+	}
+	return 0
+}
+
+func (x *Rect) GetRight() int32 {
+	if x != nil {
+		return x.Right
+	}
+	return 0
+}
+
+func (x *Rect) GetTop() int32 {
+	if x != nil {
+		return x.Top
+	}
+	return 0
+}
+
+func (x *Rect) GetBottom() int32 {
+	if x != nil {
+		return x.Bottom
+	}
+	return 0
+}
 
 var File_control_proto protoreflect.FileDescriptor
 
 const file_control_proto_rawDesc = "" +
 	"\n" +
-	"\rcontrol.proto\x12\x13com.project.control\"\xc3\x01\n" +
+	"\rcontrol.proto\x12\x13com.project.control\"\x93\x01\n" +
+	"\fNidhoggHello\x12!\n" +
+	"\fcontainer_id\x18\x01 \x01(\tR\vcontainerId\x12!\n" +
+	"\fscreen_width\x18\x02 \x01(\x05R\vscreenWidth\x12#\n" +
+	"\rscreen_height\x18\x03 \x01(\x05R\fscreenHeight\x12\x18\n" +
+	"\aversion\x18\x04 \x01(\tR\aversion\"\x85\x02\n" +
 	"\x0eNidhoggRequest\x123\n" +
 	"\x03tap\x18\x01 \x01(\v2\x1f.com.project.control.TapCommandH\x00R\x03tap\x129\n" +
 	"\x05swipe\x18\x02 \x01(\v2!.com.project.control.SwipeCommandH\x00R\x05swipe\x126\n" +
-	"\x04crop\x18\x03 \x01(\v2 .com.project.control.CropRequestH\x00R\x04cropB\t\n" +
+	"\x04crop\x18\x03 \x01(\v2 .com.project.control.CropRequestH\x00R\x04crop\x12@\n" +
+	"\bget_dump\x18\x04 \x01(\v2#.com.project.control.GetDumpRequestH\x00R\agetDumpB\t\n" +
 	"\apayload\"(\n" +
 	"\n" +
 	"TapCommand\x12\f\n" +
@@ -422,13 +800,38 @@ const file_control_proto_rawDesc = "" +
 	"\x01x\x18\x01 \x01(\x05R\x01x\x12\f\n" +
 	"\x01y\x18\x02 \x01(\x05R\x01y\x12\x14\n" +
 	"\x05width\x18\x03 \x01(\x05R\x05width\x12\x16\n" +
-	"\x06height\x18\x04 \x01(\x05R\x06height\"q\n" +
+	"\x06height\x18\x04 \x01(\x05R\x06height\"\x10\n" +
+	"\x0eGetDumpRequest\"\xb5\x01\n" +
 	"\x0fNidhoggResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1b\n" +
 	"\terror_msg\x18\x02 \x01(\tR\berrorMsg\x12\x1f\n" +
 	"\n" +
-	"image_data\x18\x03 \x01(\fH\x00R\timageDataB\x06\n" +
-	"\x04dataB5Z3github.com/Vancheszz/android-agent/internal/controlb\x06proto3"
+	"image_data\x18\x03 \x01(\fH\x00R\timageData\x12B\n" +
+	"\vscreen_dump\x18\x04 \x01(\v2\x1f.com.project.control.ScreenDumpH\x00R\n" +
+	"screenDumpB\x06\n" +
+	"\x04data\"\xae\x01\n" +
+	"\n" +
+	"ScreenDump\x12!\n" +
+	"\fpackage_name\x18\x01 \x01(\tR\vpackageName\x12\x1c\n" +
+	"\ttimestamp\x18\x02 \x01(\x03R\ttimestamp\x12\x14\n" +
+	"\x05width\x18\x03 \x01(\x05R\x05width\x12\x16\n" +
+	"\x06height\x18\x04 \x01(\x05R\x06height\x121\n" +
+	"\x05nodes\x18\x05 \x03(\v2\x1b.com.project.control.UiNodeR\x05nodes\"\xdf\x01\n" +
+	"\x06UiNode\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x1b\n" +
+	"\tparent_id\x18\x02 \x01(\x05R\bparentId\x12\x12\n" +
+	"\x04text\x18\x03 \x01(\tR\x04text\x12\x1f\n" +
+	"\vresource_id\x18\x04 \x01(\tR\n" +
+	"resourceId\x12\x1d\n" +
+	"\n" +
+	"class_name\x18\x05 \x01(\tR\tclassName\x12!\n" +
+	"\fis_clickable\x18\x06 \x01(\bR\visClickable\x121\n" +
+	"\x06bounds\x18\a \x01(\v2\x19.com.project.control.RectR\x06bounds\"Z\n" +
+	"\x04Rect\x12\x12\n" +
+	"\x04left\x18\x01 \x01(\x05R\x04left\x12\x14\n" +
+	"\x05right\x18\x02 \x01(\x05R\x05right\x12\x10\n" +
+	"\x03top\x18\x03 \x01(\x05R\x03top\x12\x16\n" +
+	"\x06bottom\x18\x04 \x01(\x05R\x06bottomB5Z3github.com/Vancheszz/android-agent/internal/controlb\x06proto3"
 
 var (
 	file_control_proto_rawDescOnce sync.Once
@@ -442,23 +845,32 @@ func file_control_proto_rawDescGZIP() []byte {
 	return file_control_proto_rawDescData
 }
 
-var file_control_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_control_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_control_proto_goTypes = []any{
-	(*NidhoggRequest)(nil),  // 0: com.project.control.NidhoggRequest
-	(*TapCommand)(nil),      // 1: com.project.control.TapCommand
-	(*SwipeCommand)(nil),    // 2: com.project.control.SwipeCommand
-	(*CropRequest)(nil),     // 3: com.project.control.CropRequest
-	(*NidhoggResponse)(nil), // 4: com.project.control.NidhoggResponse
+	(*NidhoggHello)(nil),    // 0: com.project.control.NidhoggHello
+	(*NidhoggRequest)(nil),  // 1: com.project.control.NidhoggRequest
+	(*TapCommand)(nil),      // 2: com.project.control.TapCommand
+	(*SwipeCommand)(nil),    // 3: com.project.control.SwipeCommand
+	(*CropRequest)(nil),     // 4: com.project.control.CropRequest
+	(*GetDumpRequest)(nil),  // 5: com.project.control.GetDumpRequest
+	(*NidhoggResponse)(nil), // 6: com.project.control.NidhoggResponse
+	(*ScreenDump)(nil),      // 7: com.project.control.ScreenDump
+	(*UiNode)(nil),          // 8: com.project.control.UiNode
+	(*Rect)(nil),            // 9: com.project.control.Rect
 }
 var file_control_proto_depIdxs = []int32{
-	1, // 0: com.project.control.NidhoggRequest.tap:type_name -> com.project.control.TapCommand
-	2, // 1: com.project.control.NidhoggRequest.swipe:type_name -> com.project.control.SwipeCommand
-	3, // 2: com.project.control.NidhoggRequest.crop:type_name -> com.project.control.CropRequest
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	2, // 0: com.project.control.NidhoggRequest.tap:type_name -> com.project.control.TapCommand
+	3, // 1: com.project.control.NidhoggRequest.swipe:type_name -> com.project.control.SwipeCommand
+	4, // 2: com.project.control.NidhoggRequest.crop:type_name -> com.project.control.CropRequest
+	5, // 3: com.project.control.NidhoggRequest.get_dump:type_name -> com.project.control.GetDumpRequest
+	7, // 4: com.project.control.NidhoggResponse.screen_dump:type_name -> com.project.control.ScreenDump
+	8, // 5: com.project.control.ScreenDump.nodes:type_name -> com.project.control.UiNode
+	9, // 6: com.project.control.UiNode.bounds:type_name -> com.project.control.Rect
+	7, // [7:7] is the sub-list for method output_type
+	7, // [7:7] is the sub-list for method input_type
+	7, // [7:7] is the sub-list for extension type_name
+	7, // [7:7] is the sub-list for extension extendee
+	0, // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_control_proto_init() }
@@ -466,13 +878,15 @@ func file_control_proto_init() {
 	if File_control_proto != nil {
 		return
 	}
-	file_control_proto_msgTypes[0].OneofWrappers = []any{
+	file_control_proto_msgTypes[1].OneofWrappers = []any{
 		(*NidhoggRequest_Tap)(nil),
 		(*NidhoggRequest_Swipe)(nil),
 		(*NidhoggRequest_Crop)(nil),
+		(*NidhoggRequest_GetDump)(nil),
 	}
-	file_control_proto_msgTypes[4].OneofWrappers = []any{
+	file_control_proto_msgTypes[6].OneofWrappers = []any{
 		(*NidhoggResponse_ImageData)(nil),
+		(*NidhoggResponse_ScreenDump)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -480,7 +894,7 @@ func file_control_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_control_proto_rawDesc), len(file_control_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
