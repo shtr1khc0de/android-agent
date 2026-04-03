@@ -168,7 +168,7 @@ func (d *Driver) write(evType, evCode uint16, value int32) error {
 	ev := inputEvent{
 		Time: syscall.Timeval{
 			Sec:  nowTime.Unix(),
-			Usec: int64(nowTime.Nanosecond() / 1000),
+			Usec: int32(nowTime.Nanosecond() / 1000), //int64 for Linux ()
 		},
 		Type:  evType,
 		Code:  evCode,

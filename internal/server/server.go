@@ -35,14 +35,13 @@ func (s *Server) StartRatatoskrServer(addr string) error {
 	}
 	s.ratatoskrListener = listener
 
-	handler := NewRatatoskrHandler(s.registry, s.dumpRequestCh)
-
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
 			// Если листенер закрыт, выходим
 			return nil
 		}
+		handler := NewRatatoskrHandler(s.registry, s.dumpRequestCh)
 		go handler.Handle(conn)
 	}
 }

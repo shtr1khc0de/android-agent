@@ -13,16 +13,17 @@ import (
 func main() {
 	log.Println("Starting Nidhogg...")
 
-	drv, err := input.NewDriverAutoEV("/dev/graphics/fb0", 1080, 1920, 4)
+	drv, err := input.NewDriverAutoEV("/dev/graphics/fb0", 720, 1280, 4)
 	if err != nil {
-		log.Fatalf("Failed to initialize driver: %v", err)
-	}
-	defer drv.Close()
+		log.Printf("Warning: Driver init failed: %v (crop will not work)", err)
+	} else {
+		defer drv.Close()
+		screensize1, screensize2 := drv.GetScreenSize()
+		touchimits1, touchlimits2 := drv.GetTouchLimits()
 
-	screenWidth, screenHeight := drv.GetScreenSize()
-	touchX, touchY := drv.GetTouchLimits()
-	log.Printf("Driver initialized: screen=%dx%d, touch_limits=(%d,%d), bpp=%d",
-		screenWidth, screenHeight, touchX, touchY, drv.BytesPerPixel)
+		log.Printf("Driver initialized: screen=%dx%d, touch_limits=(%d,%d), bpp=%d",
+			screensize1, screensize2, touchimits1, touchlimits2, drv.GetBytesPerPixel())
+	}
 
 	srv := server.NewServer(drv)
 
@@ -41,7 +42,7 @@ func main() {
 	}()
 
 	log.Println("Nidhogg is running")
-	log.Println("  - Ratatoskr port: :9999 (receives ScreenDump)")
+	log.Println("  - Ratatoskr port: :9999 (receives ScreenDump, sends commands)")
 	log.Println("  - Yggdrasil port: :9998 (receives commands)")
 
 	quit := make(chan os.Signal, 1)

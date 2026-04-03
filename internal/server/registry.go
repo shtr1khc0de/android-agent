@@ -4,29 +4,51 @@ import (
 	"sync"
 )
 
+// Registry хранит активные соединения
 type Registry struct {
-	mu     sync.RWMutex
-	client *YggdrasilHandler
+	mu        sync.RWMutex
+	yggdrasil *YggdrasilHandler
+	ratatoskr *RatatoskrHandler
 }
 
 func NewRegistry() *Registry {
 	return &Registry{}
 }
 
-func (r *Registry) Set(client *YggdrasilHandler) {
+// Yggdrasil
+func (r *Registry) SetYggdrasil(client *YggdrasilHandler) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	r.client = client
+	r.yggdrasil = client
 }
 
-func (r *Registry) Get() *YggdrasilHandler {
+func (r *Registry) GetYggdrasil() *YggdrasilHandler {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	return r.client
+	return r.yggdrasil
 }
 
-func (r *Registry) Clear() {
+func (r *Registry) ClearYggdrasil() {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	r.client = nil
+	r.yggdrasil = nil
+}
+
+// Ratatoskr
+func (r *Registry) SetRatatoskr(handler *RatatoskrHandler) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.ratatoskr = handler
+}
+
+func (r *Registry) GetRatatoskr() *RatatoskrHandler {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.ratatoskr
+}
+
+func (r *Registry) ClearRatatoskr() {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.ratatoskr = nil
 }
